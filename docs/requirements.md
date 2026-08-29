@@ -1,10 +1,9 @@
 # Autonomous Underwater Mapping Vehicle
+## System Requirements — Version 0.2
 
-## System Requirements — Version 0.1
-
-**Project:** SDU Underwater Mapping AUV
-**Version:** 0.1
-**Date:** 29 August 2026
+**Project:** SDU Underwater Mapping AUV  
+**Version:** 0.2  
+**Date:** 29 August 2026  
 **Status:** Initial research requirements
 
 ---
@@ -27,28 +26,32 @@ The project will be developed incrementally:
 6. Autonomous underwater vehicle
 7. Autonomous bathymetric mapping
 
+The project is not intended initially for deep-sea operation, biological sampling, manipulation, pipeline inspection, fish identification, or photorealistic visual reconstruction.
+
+The primary engineering objective is:
+
+> **Determine the geometry of the seabed accurately and reproducibly using an underwater robotic platform.**
+
 ---
 
-# 2. Primary Mission
+## 2. Primary Mission
 
 The final prototype shall be capable of performing the following mission:
 
 1. Start at the water surface.
-2. Determine its initial position using GPS.
+2. Determine its initial position using GPS/GNSS.
 3. Receive a predefined survey area.
 4. Dive to the required operating depth.
 5. Navigate toward the survey area.
 6. Follow a predefined survey pattern.
-7. Measure the seabed using sonar.
+7. Measure the seabed using acoustic sensors.
 8. Record vehicle position, orientation, depth and sonar measurements.
 9. Complete the survey.
 10. Return toward the recovery position.
 11. Surface automatically.
 12. Provide the recorded data for generation of a bathymetric map.
 
-A typical survey pattern will be a lawnmower pattern.
-
-Example:
+A typical survey pattern will be a lawnmower or parallel-track pattern.
 
 ```text
 START
@@ -68,352 +71,480 @@ SURVEY COMPLETE
 
 ---
 
-# 3. Initial Operating Environment
+## 3. Primary Mapping Objective
+
+The primary mapping objective is **bathymetric mapping**.
+
+The system shall estimate seabed geometry in the form:
+
+z = f(x,y)
+
+where:
+
+- x = horizontal position
+- y = horizontal position
+- z = seabed elevation or depth
+
+The mapping system shall therefore generate a collection of seabed points:
+
+```text
+Pi = [xi, yi, zi]
+```
+
+These points may later be used to produce:
+
+- a point cloud
+- a gridded depth map
+- a contour map
+- a 3D seabed surface
+
+The initial project does not require visual texture mapping or photogrammetry.
+
+---
+
+## 4. Mapping Accuracy Requirement
+
+The mapping system shall provide a method for **quantitatively evaluating mapping accuracy against reference measurements**.
+
+This requirement is considered more important than maximizing survey area during early development.
+
+A small accurately validated map is preferred over a larger map of unknown accuracy.
+
+Initial examples of possible validation methods include:
+
+- surveying a known pool floor
+- mapping known submerged objects
+- comparing with manually measured depth points
+- comparing with existing reference bathymetry where suitable
+
+Exact acceptable mapping error is currently **TBD** and shall be established after sensor and localization research.
+
+---
+
+## 5. Development Vehicle Classes
+
+The project shall use different requirements for different development stages.
+
+### Prototype 1 — Development ROV
+
+The first physical vehicle is intended primarily for:
+
+- propulsion testing
+- waterproofing testing
+- control development
+- sensor integration
+- software integration
+
+Target requirements:
+
+| Requirement | Target |
+|---|---|
+| Operating depth | 0–3 m |
+| Structural design depth | ≥10 m |
+| Endurance | ≥30 min |
+| Preferred endurance | ≥45 min |
+| Control | Tethered/manual |
+| Depth hold | Required |
+| Heading hold | Required |
+| Camera | Recommended |
+| Mapping sonar | Not initially required |
+| Underwater localization | Not initially required |
+| Positive buoyancy | Required |
+| Modular sensor mounting | Required |
+
+### Prototype 2 — Mapping ROV
+
+The mapping ROV shall be capable of creating basic bathymetric maps while still operating tethered.
+
+Target requirements:
+
+| Requirement | Target |
+|---|---|
+| Operating depth | ≤5 m initially |
+| Structural design depth | ≥10 m |
+| Survey area | ≥20 × 20 m target |
+| Survey speed | 0.3–0.7 m/s |
+| Endurance | ≥45 min preferred |
+| Mapping sensor | Downward acoustic ranging |
+| Survey pattern | Parallel/lawnmower |
+| Track spacing | Adjustable |
+| Depth hold | Required |
+| Heading hold | Required |
+| Data logging | Required |
+| Localization | External, relative, or experimental |
+
+### Final AUV
+
+The operating depth of the final AUV shall remain:
+
+> **TBD following use-case, sensor, pressure-system and environmental research.**
+
+The final vehicle shall not be permanently constrained to the initial 5 m or 10 m figures simply because those values are convenient for early prototypes.
+
+The final depth requirement shall be established later based on:
+
+- intended Baltic Sea use cases
+- pressure housing design
+- sonar capability
+- localization capability
+- recovery risk
+- cost
+- available university equipment
+
+---
+
+## 6. Initial Operating Environment
 
 The vehicle is intended primarily for shallow-water coastal operation.
 
-Initial target environment:
+Initial target environments include:
 
-* Baltic Sea coastal waters near Sønderborg
-* Lakes
-* Harbours
-* Swimming pools or controlled test basins during development
+- Baltic Sea coastal waters near Sønderborg
+- lakes
+- harbours
+- swimming pools
+- controlled test basins
 
 The system shall be designed with the expectation of:
 
-* low underwater visibility;
-* suspended particles;
-* moderate water currents;
-* salt or brackish water;
-* vegetation;
-* uneven seabed;
-* low underwater lighting.
+- low underwater visibility
+- suspended particles
+- moderate water currents
+- salt or brackish water
+- vegetation
+- uneven seabed
+- low underwater lighting
+- possible sediment disturbance close to the seabed
 
-The vehicle shall therefore **not depend on visual camera data to successfully complete its mapping mission**.
-
----
-
-# 4. Initial Performance Requirements
-
-These values are preliminary and may be modified following research and simulation.
-
-| Parameter                       |          Initial Requirement |
-| ------------------------------- | ---------------------------: |
-| Normal operating depth          |                        0–5 m |
-| Design/test depth               |                         10 m |
-| Initial survey area             |                  ≥ 20 × 20 m |
-| Typical vehicle speed           |                  0.3–0.7 m/s |
-| Minimum mission duration        |                       30 min |
-| Minimum controlled ROV duration |             45 min preferred |
-| Survey pattern                  | Lawn-mower / parallel tracks |
-| Initial track spacing           |                        1–2 m |
-| Mapping method                  |          Acoustic bathymetry |
-| Initial control method          |                     Tethered |
-| Final control method            |                   Autonomous |
-| Surface positioning             |                     GNSS/GPS |
-| Underwater positioning          |                Sensor fusion |
-| Recovery state                  |  Positive buoyancy / surface |
-
-Exact positioning and mapping accuracy requirements are currently **TBD** and will be defined after studying available sensors and mapping methods.
+The vehicle shall therefore **not depend on visual camera data to successfully complete its primary mapping mission**.
 
 ---
 
-# 5. Vehicle Degrees of Freedom
+## 7. Vehicle Degrees of Freedom
 
 The vehicle operates with six degrees of freedom.
 
 ### Translation
 
-* **Surge:** forward/backward
-* **Sway:** left/right
-* **Heave:** up/down
+- **Surge:** forward/backward
+- **Sway:** left/right
+- **Heave:** up/down
 
 ### Rotation
 
-* **Roll**
-* **Pitch**
-* **Yaw**
+- **Roll**
+- **Pitch**
+- **Yaw**
 
 The propulsion system shall eventually provide sufficient control authority for:
 
-* forward/backward movement;
-* vertical movement;
-* heading control;
-* controlled turning;
-* roll/pitch stabilization.
+- forward/backward movement
+- vertical movement
+- heading control
+- controlled turning
+- roll/pitch stabilization
 
 Direct sway control is desirable but is not mandatory for the first physical prototype.
 
 ---
 
-# 6. Buoyancy Requirements
+## 8. Buoyancy Requirements
 
 The vehicle shall have approximately neutral buoyancy during normal operation.
 
-For safety, the final vehicle should preferably have **slightly positive buoyancy**.
+For safety, the vehicle should preferably have **slightly positive buoyancy**.
 
 This means:
 
-$$
-F_B > F_G
-$$
+```text
+FB > FG
+```
 
-where
+where:
 
-$$
-F_B = \rho Vg
-$$
+```text
+FB = ρVg
+FG = mg
+```
 
-and
+The buoyancy difference should be small enough that the vertical thrusters can maintain depth without excessive continuous thrust.
 
-$$
-F_G = mg
-$$
-
-The difference should be small enough that the vertical thrusters can easily maintain depth.
-
-In the event of complete power loss, the preferred behaviour is:
+In the event of complete power loss, the preferred vehicle behaviour shall be:
 
 ```text
 POWER FAILURE
       ↓
-thrusters stop
+Thrusters stop
       ↓
-vehicle slowly rises
+Vehicle slowly rises
       ↓
-vehicle reaches surface
+Vehicle reaches surface
 ```
 
 Ballast and buoyancy material shall be adjustable during development.
 
 ---
 
-# 7. Static Stability Requirements
+## 9. Static Stability Requirements
 
 The vehicle shall be mechanically designed so that:
 
-$$
-CoB_z > CoM_z
-$$
+```text
+CoBz > CoMz
+```
 
 where:
 
-* CoB = Centre of Buoyancy
-* CoM = Centre of Mass
+- CoB = Centre of Buoyancy
+- CoM = Centre of Mass
 
 The centre of buoyancy should be located above the centre of mass.
 
-This arrangement shall produce a passive restoring moment when the vehicle experiences roll or pitch disturbances.
+This arrangement shall create a passive restoring moment when the vehicle experiences roll or pitch disturbances.
 
-The vehicle should therefore naturally attempt to return toward a level orientation.
+The vehicle should therefore naturally tend toward a level orientation.
 
-The mechanical design should provide adjustable locations for:
+The mechanical design should allow adjustment of:
 
-* battery;
-* ballast;
-* buoyancy foam;
-* heavy electronics.
+- battery position
+- ballast
+- buoyancy foam
+- heavy electronics
+- sensor position where practical
 
 This will allow the centre of mass and centre of buoyancy to be tuned experimentally.
 
 ---
 
-# 8. Propulsion Requirements
+## 10. Propulsion Requirements
 
-The first complete ROV should use approximately **six independently controlled thrusters**.
+The first complete ROV should use approximately **six independently controlled thrusters**, subject to later simulation and design validation.
 
-Target configuration:
+An initial candidate configuration consists of:
 
-* four horizontal thrusters;
-* two vertical thrusters.
+- four horizontal thrusters
+- two vertical thrusters
 
 The horizontal thrusters should provide:
 
-* surge;
-* yaw;
-* preferably sway capability depending on configuration.
+- surge
+- yaw
+- preferably sway depending on orientation
 
 The vertical thrusters should provide:
 
-* heave;
-* pitch/roll correction when possible.
+- heave
+- pitch and/or roll correction where possible
 
-The exact thruster configuration will be selected after simulation.
+The exact thruster configuration shall not be finalized until simulation has been performed.
 
-Each thruster shall be individually controllable through an electronic speed controller.
+Each thruster shall be individually controllable.
 
 The propulsion system should support bidirectional thrust.
 
 ---
 
-# 9. Pressure Housing Requirements
+## 11. Pressure Housing Requirements
 
-All electronics requiring protection from water shall be enclosed in waterproof pressure housings.
+All electronics requiring protection from water shall be enclosed in suitable waterproof pressure housings.
 
-Initial design pressure:
+For Prototype 1, the structural design depth shall be at least:
 
-$$
-P=P_0+\rho gh
-$$
+```text
+10 m
+```
 
-At a design depth of 10 m, the housing should withstand approximately two atmospheres of absolute pressure.
+The housing pressure may be estimated using:
+
+```text
+P = P0 + ρgh
+```
+
+At approximately 10 m depth, the housing should withstand roughly two atmospheres of absolute pressure.
 
 The housing system shall include:
 
-* appropriate O-ring seals;
-* removable endcaps;
-* waterproof electrical penetrators;
-* pressure/vacuum testing capability;
-* internal leak detection.
+- suitable O-ring seals
+- removable endcaps
+- waterproof electrical penetrators
+- pressure or vacuum testing capability
+- internal leak detection
 
-The pressure housing shall be tested without electronics before underwater operation.
+The pressure housing shall be tested without critical electronics before underwater operation.
 
 ---
 
-# 10. Required Sensors
-
-## Essential Sensors
+## 12. Required Sensors
 
 ### IMU
 
 Used to estimate:
 
-* roll;
-* pitch;
-* yaw rate;
-* acceleration.
-
----
+- roll
+- pitch
+- angular velocity
+- linear acceleration
+- attitude-related information
 
 ### Pressure Sensor
 
 Used to calculate vehicle depth.
 
-The pressure sensor shall provide sufficient resolution for stable depth control.
-
----
+The pressure sensor shall provide sufficient resolution and update rate for stable depth control.
 
 ### Magnetometer / Compass
 
 Used for heading estimation.
 
----
+Possible magnetic interference from:
+
+- thrusters
+- power wiring
+- batteries
+- metal structures
+
+shall be considered in sensor placement and calibration.
 
 ### Leak Sensor
 
-Used to detect water inside the electronics enclosure.
+Used to detect water inside protected electronics enclosures.
 
-Detection of a leak shall eventually trigger an emergency recovery procedure.
-
----
+Leak detection shall eventually trigger an emergency recovery procedure.
 
 ### Battery Monitoring
 
-The system shall monitor:
+The system shall monitor at minimum:
 
-* battery voltage;
-* preferably current;
-* preferably consumed energy.
+- battery voltage
 
----
+Preferably it shall also monitor:
 
-# 11. Navigation Sensors
-
-## GPS / GNSS
-
-GPS shall be used when the vehicle is at or near the water surface.
-
-GPS shall provide:
-
-* initial mission position;
-* final recovery position;
-* surface tracking.
-
-GPS shall **not** be considered available while the vehicle is submerged.
+- current
+- consumed energy
+- estimated remaining energy
 
 ---
 
-## Doppler Velocity Log — Future Requirement
+## 13. Navigation Sensors
 
-A DVL may eventually be used to estimate:
+### GPS / GNSS
 
-* velocity relative to the seabed;
-* altitude above seabed.
+GPS/GNSS shall be used when the vehicle is at or near the surface.
 
-A DVL is not required for the first ROV prototype due to cost.
+It may provide:
+
+- initial mission position
+- final recovery position
+- surface tracking
+- correction of accumulated localization drift
+
+GPS/GNSS shall not be considered available during normal submerged operation.
+
+### DVL — Future Candidate
+
+A Doppler Velocity Log may eventually be used to estimate:
+
+- velocity relative to the seabed
+- altitude above seabed
+
+A DVL is not required for the first physical prototype due to likely cost.
+
+The project shall first investigate whether a DVL is necessary and whether one can be obtained through:
+
+- SDU research equipment
+- sponsorship
+- project funding
+- borrowing
+- alternative low-cost localization methods
 
 ---
 
-# 12. Mapping Sensors
+## 14. Mapping Sensors
 
-## Initial Mapping Sensor
+### Initial Mapping Sensor
 
 The first mapping prototype should use a downward-looking acoustic range sensor or single-beam sonar.
 
-The sensor shall measure approximately:
+The sensor shall estimate:
 
-$$
-h=\text{distance between vehicle and seabed}
-$$
+```text
+h = distance between vehicle and seabed
+```
 
-When combined with vehicle depth:
+If vehicle depth is:
 
-$$
-z_{bottom}=z_{vehicle}+h
-$$
+```text
+z_vehicle
+```
 
-subject to the chosen coordinate convention.
+and measured seabed altitude is:
 
-The resulting measurements can be combined with vehicle position:
+```text
+h
+```
 
-$$
-(x,y,z_{bottom})
-$$
+then seabed depth can approximately be obtained from:
 
-to form a basic bathymetric point cloud.
+```text
+z_bottom = z_vehicle + h
+```
 
----
+subject to the coordinate convention used.
 
-## Future Mapping Sensors
+When combined with vehicle horizontal position:
+
+```text
+x, y
+```
+
+the system can generate:
+
+```text
+(x, y, z_bottom)
+```
+
+measurements for bathymetric mapping.
+
+### Future Mapping Sensors
 
 Future versions may investigate:
 
-* mechanical scanning sonar;
-* side-scan sonar;
-* multibeam echosounder.
+- mechanically scanning sonar
+- side-scan sonar
+- multibeam echosounder
 
-A multibeam system is considered an advanced-stage capability rather than a requirement for the first prototype.
+Advanced mapping sonar shall be considered a later-stage capability rather than a requirement for Prototype 1.
 
 ---
 
-# 13. Camera Requirements
+## 15. Camera Requirements
 
-A camera is **not required for the primary mapping function**.
+A camera is **not required for the primary bathymetric mapping function**.
 
 Poor visibility is expected in Baltic coastal waters.
 
-The vehicle shall therefore be capable of operating when the camera provides little or no useful information.
+The vehicle shall therefore be capable of completing its mission when the camera provides little or no useful visual data.
 
 A camera may nevertheless be installed for:
 
-* vehicle inspection;
-* identifying obstacles;
-* debugging;
-* observing the seabed;
-* identifying objects detected by sonar;
-* recording missions;
-* public demonstrations;
-* future visual navigation research.
+- vehicle inspection
+- debugging
+- identifying obstacles
+- observing the seabed
+- identifying objects detected acoustically
+- mission recording
+- public demonstrations
+- future visual navigation research
 
 Artificial lighting may be installed.
 
-Lighting should preferably be positioned away from the optical axis of the camera to reduce backscatter from suspended particles.
+Lighting should preferably be positioned away from the camera optical axis in order to reduce backscatter from suspended particles.
 
 ---
 
-# 14. Main Control System
+## 16. Main Control System
 
-The vehicle should use a dedicated autopilot/flight controller for low-level control.
+The vehicle should use a dedicated autopilot or flight controller for low-level control.
 
 The initial candidate software platform is:
 
@@ -421,49 +552,51 @@ The initial candidate software platform is:
 
 The autopilot shall eventually handle:
 
-* IMU processing;
-* attitude estimation;
-* thruster mixing;
-* depth control;
-* heading control;
-* low-level vehicle stabilization;
-* basic failsafes.
+- IMU processing
+- attitude estimation
+- thruster mixing
+- depth control
+- heading control
+- low-level stabilization
+- basic failsafes
+
+The project shall avoid placing mission-critical low-level stabilization exclusively on the companion computer.
 
 ---
 
-# 15. Companion Computer
+## 17. Companion Computer
 
 A separate onboard computer may eventually be used for high-level autonomous functions.
 
-Possible platform:
+Possible platforms include:
 
-* Raspberry Pi;
-* equivalent ARM computer;
-* other suitable single-board computer.
+- Raspberry Pi
+- equivalent ARM-based computer
+- other suitable single-board computer
 
-It may perform:
+The companion computer may perform:
 
-* sonar processing;
-* mission planning;
-* mapping;
-* data logging;
-* ROS 2 nodes;
-* sensor fusion;
-* SLAM;
-* object recognition.
+- sonar processing
+- mission planning
+- mapping
+- data logging
+- ROS 2 nodes
+- sensor fusion
+- SLAM
+- object recognition
+- high-level autonomy
 
-Communication between the companion computer and the autopilot shall preferably use **MAVLink**.
+Communication between the companion computer and autopilot should preferably use **MAVLink**.
 
 ---
 
-# 16. Software Architecture
+## 18. Software Architecture
 
 Initial intended architecture:
 
 ```text
                     Mission planner
                          ROS 2
-                           │
                            │
                         MAVLink
                            │
@@ -481,28 +614,21 @@ Initial intended architecture:
 Sensors:
 
 IMU ──────────────→ ArduSub
-
 Pressure ─────────→ ArduSub
-
 Compass ──────────→ ArduSub
-
 Leak sensor ──────→ Safety system
 
-
 Sonar ─────────────→ Companion computer
-
 DVL ───────────────→ Companion computer
-
 Camera ────────────→ Companion computer
-
 GPS ───────────────→ Navigation system
 ```
 
 ---
 
-# 17. Mapping Architecture
+## 19. Mapping Architecture
 
-The eventual mapping pipeline shall follow approximately:
+The eventual mapping pipeline shall approximately follow:
 
 ```text
 IMU ────────┐
@@ -528,54 +654,81 @@ Sonar ────────────────────────�
                                Bathymetric map
 ```
 
+The fundamental mapping problem can therefore be divided into three major tasks:
+
+1. Determine where the vehicle is.
+2. Determine where the seabed is relative to the vehicle.
+3. Transform seabed measurements into a common world coordinate system.
+
 ---
 
-# 18. Communications
+## 20. Coordinate Transformation Requirement
+
+The mapping system shall eventually transform sonar measurements from the sensor coordinate frame into a fixed world or map coordinate frame.
+
+Conceptually:
+
+```text
+P_world = T_world_vehicle × T_vehicle_sensor × P_sensor
+```
+
+This transformation requires knowledge of:
+
+- vehicle position
+- vehicle orientation
+- sensor position relative to vehicle
+- sensor orientation relative to vehicle
+
+Accurate sensor mounting geometry shall therefore be considered part of the mapping system.
+
+---
+
+## 21. Communications
 
 During early development, the vehicle shall operate using a tether.
 
 The tether may carry:
 
-* Ethernet;
-* serial communication;
-* power depending on architecture;
-* emergency recovery line.
+- Ethernet
+- serial communication
+- power depending on architecture
+- emergency recovery capability
 
 The final autonomous system shall not depend upon continuous communication with the surface.
 
 ---
 
-# 19. Data Logging
+## 22. Data Logging
 
 The vehicle shall log all mission-critical information with timestamps.
 
-The minimum logged data should eventually include:
+Minimum logged information should eventually include:
 
-* time;
-* depth;
-* pressure;
-* roll;
-* pitch;
-* yaw;
-* vehicle state;
-* thruster commands;
-* battery voltage;
-* battery current if available;
-* sonar distance;
-* estimated position;
-* GPS position when available;
-* mission mode;
-* error/failsafe events.
+- time
+- depth
+- pressure
+- roll
+- pitch
+- yaw
+- vehicle state
+- thruster commands
+- battery voltage
+- battery current if available
+- sonar distance
+- estimated position
+- GPS position when available
+- mission mode
+- error and failsafe events
 
-The system should use synchronized timestamps so sensor data can be combined after the mission.
+The system shall use synchronized timestamps so that sensor measurements can be accurately combined after the mission.
 
 ---
 
-# 20. Safety Requirements
+## 23. Safety Requirements
 
 Safety and recovery shall be considered from the beginning of the project.
 
-The eventual autonomous vehicle shall provide failsafe responses for at least:
+The eventual autonomous vehicle shall provide failsafe responses for at least the following conditions.
 
 ### Leak detected
 
@@ -627,31 +780,77 @@ Positive buoyancy should cause the vehicle to rise slowly toward the surface.
 
 ---
 
-# 21. Mechanical Design Requirements
+## 24. Mechanical Design Requirements
 
-The first vehicle should prioritize modularity over hydrodynamic efficiency.
+The first physical vehicle should prioritize:
 
-The design should allow easy repositioning of:
+- modularity
+- accessibility
+- maintainability
+- testability
 
-* thrusters;
-* battery;
-* sensors;
-* ballast;
-* buoyancy material;
-* sonar;
-* camera.
+over hydrodynamic efficiency.
 
-The initial vehicle should therefore use an open-frame ROV architecture rather than a streamlined torpedo-shaped body.
+The first vehicle should therefore use an open-frame ROV architecture rather than a highly streamlined torpedo-shaped body.
 
-Siemens NX will be used as the primary CAD environment.
+The mechanical design shall allow easy repositioning or replacement of:
+
+- thrusters
+- battery
+- sensors
+- ballast
+- buoyancy material
+- sonar
+- camera
+- electronics enclosures
+
+**Siemens NX** shall be used as the primary CAD environment.
 
 ---
 
-# 22. Modularity Requirement
+## 25. Modularity Requirement
 
-Subsystems should be designed as separate modules wherever practical.
+Major sensing, computing and propulsion components should be replaceable without redesigning the complete vehicle.
 
-Possible modules:
+This includes, where practical:
+
+- mapping sonar
+- navigation sensors
+- companion computer
+- autopilot
+- camera
+- thrusters
+- communication hardware
+
+The vehicle should provide standardized mounting locations or adaptable interfaces where practical.
+
+Conceptually:
+
+```text
+                 VEHICLE
+                    │
+             Sensor interface
+                    │
+          ┌─────────┴─────────┐
+          │                   │
+ Initial low-cost sonar   Future sonar
+                          or multibeam
+```
+
+This modularity is particularly important because future sensors may be obtained through:
+
+- SDU research groups
+- sponsorship
+- competitions
+- external funding
+
+---
+
+## 26. Major System Modules
+
+Where practical, the vehicle shall be divided into separate functional modules.
+
+Possible modules include:
 
 ```text
 Propulsion module
@@ -659,54 +858,46 @@ Power module
 Autopilot module
 Companion computer module
 Navigation module
-Sonar module
+Mapping sonar module
 Camera module
 Communication module
 Safety/recovery module
+Pressure housing module
 ```
 
-This should allow individual systems to be replaced or upgraded without redesigning the entire vehicle.
+Subsystems should be testable independently where practical.
 
 ---
 
-# 23. Development Strategy
+## 27. Development Strategy
 
-Development shall follow the sequence:
+Development shall follow the approximate sequence:
 
 ### Stage 1
-
-Software research and simulation
+Requirements, research and software simulation
 
 ### Stage 2
-
-Bench electronics
+Bench electronics and component testing
 
 ### Stage 3
-
 Mechanical frame and waterproof housing
 
 ### Stage 4
-
 Tethered manual ROV
 
 ### Stage 5
-
-Depth and attitude stabilization
+Depth, heading and attitude stabilization
 
 ### Stage 6
-
 Tethered sonar mapping
 
 ### Stage 7
-
 Underwater localization
 
 ### Stage 8
-
 Untethered autonomous operation
 
 ### Stage 9
-
 Advanced bathymetric mapping
 
 A stage shall not progress merely because a planned date has been reached.
@@ -715,7 +906,7 @@ Each stage should have defined validation tests before progression.
 
 ---
 
-# 24. First Physical Prototype Success Criteria
+## 28. Prototype 1 Success Criteria
 
 The first ROV shall be considered successful when it can repeatedly:
 
@@ -734,7 +925,7 @@ Autonomy and mapping are **not requirements for Prototype 1**.
 
 ---
 
-# 25. First Mapping Prototype Success Criteria
+## 29. First Mapping Prototype Success Criteria
 
 The mapping prototype shall be considered successful when it can:
 
@@ -743,13 +934,15 @@ The mapping prototype shall be considered successful when it can:
 3. Associate each sonar measurement with an estimated vehicle position.
 4. Perform a controlled survey pattern.
 5. Record synchronized sensor data.
-6. Generate a basic seabed elevation map from the recorded data.
+6. Generate a basic seabed elevation map.
+7. Compare the generated map against a reference.
+8. Calculate or estimate mapping error.
 
 The first mapping mission may remain tethered.
 
 ---
 
-# 26. Final Prototype Success Criteria
+## 30. Final Prototype Success Criteria
 
 The long-term prototype should be capable of:
 
@@ -758,55 +951,74 @@ The long-term prototype should be capable of:
 3. Diving autonomously.
 4. Navigating underwater.
 5. Following a survey trajectory.
-6. Recording bathymetric measurements.
-7. Detecting major faults.
-8. Aborting safely when required.
-9. Returning toward its deployment position.
-10. Surfacing autonomously.
-11. Producing a bathymetric representation of the surveyed seabed.
+6. Recording acoustic bathymetric measurements.
+7. Estimating its underwater position.
+8. Detecting major faults.
+9. Aborting safely when required.
+10. Returning toward its deployment position.
+11. Surfacing autonomously.
+12. Producing a bathymetric representation of the surveyed seabed.
+13. Providing an estimate of mapping accuracy.
 
 ---
 
-# 27. Open Research Questions
+## 31. Open Research Questions
 
-The following questions remain intentionally unresolved in Version 0.1:
+The following questions remain intentionally unresolved in Version 0.2:
 
-* Which thrusters should be used?
-* What exact thruster configuration should be selected?
-* What autopilot hardware should be used?
-* What companion computer should be used?
-* What battery chemistry and voltage should be used?
-* How much battery capacity is required?
-* What pressure vessel dimensions are required?
-* Which sonar should be used for Prototype 1?
-* What mapping resolution is realistically achievable?
-* What absolute mapping accuracy is required?
-* How accurately can the ROV be localized while tethered?
-* Is a DVL financially achievable?
-* Which localization method should be used before purchasing a DVL?
-* Which ROS 2 architecture should be used?
-* Which simulator should be used alongside ArduSub SITL?
-* What maximum current speed should the vehicle tolerate?
-* What legal/operational restrictions apply to autonomous testing near Sønderborg?
-* What university equipment can be accessed?
-* What equipment may be available through SDU research groups?
+- What final operating depth is useful for Baltic Sea missions?
+- Which thrusters should be used?
+- What exact thruster configuration should be selected?
+- Is direct sway control necessary?
+- What autopilot hardware should be used?
+- What companion computer should be used?
+- What battery chemistry and voltage should be used?
+- How much battery capacity is required?
+- What pressure vessel dimensions are required?
+- Which materials should be used for the frame and housings?
+- Which sonar should be used for Prototype 2?
+- What mapping resolution is realistically achievable?
+- What vertical mapping accuracy is realistically achievable?
+- What horizontal positioning accuracy is required?
+- How accurately can the ROV be localized while tethered?
+- Is a DVL financially achievable?
+- Can a DVL be borrowed from SDU?
+- Which localization method should be used before obtaining a DVL?
+- Is acoustic positioning required?
+- Which ROS 2 architecture should be used?
+- Which simulator should be used alongside ArduSub SITL?
+- Can Stonefish be used effectively through WSL2?
+- What maximum current speed should the vehicle tolerate?
+- What seabed altitude should be maintained during surveys?
+- What survey line spacing should be used?
+- What legal or operational restrictions apply to autonomous testing near Sønderborg?
+- What university equipment can be accessed?
+- What equipment may be available through SDU research groups?
+- How should the system determine that localization has become unreliable?
+- What recovery system should be used for untethered operation?
 
-These questions shall be progressively answered through research, simulation and testing.
+These questions shall be progressively answered through research, simulation and experimental testing.
 
 ---
 
-# 28. Immediate Development Objective
+## 32. Immediate Development Objective
 
 The immediate objective is **not to build the physical vehicle**.
 
 The first engineering milestone is:
 
-> Create a simulated underwater vehicle using ArduSub/SITL that can receive commands, report telemetry and eventually perform a simple predefined survey trajectory.
+> **Create a simulated underwater vehicle using ArduSub/SITL that can receive commands, report telemetry and eventually perform a simple predefined survey trajectory.**
 
-The next work package therefore focuses on:
+Before beginning advanced simulation, the next research task is to understand the basic physical vehicle architecture.
 
-1. ArduSub architecture
-2. SITL
-3. MAVLink
-4. Basic underwater vehicle dynamics
-5. Simulation
+The next work package shall therefore investigate:
+
+1. Six-degree-of-freedom underwater vehicle motion
+2. Required actively controlled degrees of freedom
+3. Candidate thruster arrangements
+4. Buoyancy
+5. Centre of mass
+6. Centre of buoyancy
+7. Passive stability
+8. Basic underwater drag
+9. How these properties affect ArduSub control and thruster mixing
